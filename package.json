@@ -1,0 +1,17 @@
+{
+  "name": "bulk-web-configurator",
+  "description": "Modify nodes of a collection of web.config files",
+  "version": "0.0.1",
+  "scripts": {
+    "default": "gulp default"
+  },
+  "devDependencies": {
+    "del": "^3.0.0",
+    "gulp": "^3.9.1",
+    "mkdirp": "^0.5.1"
+  },
+  "dependencies": {
+    "glob": "^7.1.4",
+    "xml-js": "^1.6.11"
+  }
+}

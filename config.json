@@ -1,0 +1,26 @@
+{
+  "mode": "insert",
+  "input": {
+    "dir": "",
+    "content": "",
+    "targetFiles": ""
+  },
+  "output": {
+    "formatting": {
+      "spaces": 2
+    }
+  },
+  "modeSettings": {
+    "insert": {
+      "node": "",
+      "match": "",
+      "nodeType": "",
+      "position": ""
+    },
+    "replace": {
+      "match": "",
+      "flags": "",
+      "replacement": ""
+    }
+  }
+}
