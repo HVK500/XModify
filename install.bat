@@ -1,3 +1,2 @@
-
-@echo off
-yarn
+@ECHO OFF
+CALL yarn

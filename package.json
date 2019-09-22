@@ -1,17 +1,16 @@
 {
-  "name": "bulk-web-configurator",
-  "description": "Modify nodes of a collection of web.config files",
-  "version": "0.0.1",
+  "name": "xmodify",
+  "description": "Modify elements of a given xml file, using a simple to understand syntax",
+  "version": "1.0.0",
   "scripts": {
-    "default": "gulp default"
+    "main": "gulp main"
   },
   "devDependencies": {
-    "del": "^3.0.0",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.2",
     "mkdirp": "^0.5.1"
   },
   "dependencies": {
-    "glob": "^7.1.4",
-    "xml-js": "^1.6.11"
+    "jsdom": "^15.1.1",
+    "xpath": "^0.0.27"
   }
 }
