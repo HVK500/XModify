@@ -1,14 +1,12 @@
 {
   "name": "xmodify",
-  "description": "Modify elements of a given xml file, using a simple to understand syntax",
   "version": "1.0.0",
-  "scripts": {
-    "main": "gulp main"
-  },
-  "devDependencies": {
-    "gulp": "^4.0.2",
-    "mkdirp": "^0.5.1"
-  },
+  "private": true,
+  "description": "Modify elements of a given xml file, using a simple to understand syntax",
+  "author": "Matthew Laird <hvk500@gmail.com>",
+  "license": "MIT",
+  "repository": "https://github.com/HVK500/XModify.git",
+  "main": "index.js",
   "dependencies": {
     "jsdom": "^15.1.1",
     "xpath": "^0.0.27"
