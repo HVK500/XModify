@@ -1,26 +1,8 @@
 const xpath = require('xpath');
-const xjs = require('xml-js');
-
-const removeWhitespace = (content) => {
-  return content.trim().replace(/(?<=\>)\s{1,}(?=\<)/g, '');
-};
-
-const xformat = (content, spaces) => {
-  return xjs.js2xml(
-    xjs.xml2js(
-      content, {
-        compact: false,
-        trim: true
-      }
-    ), {
-      spaces: spaces != null ? spaces : 2,
-      compact: false,
-      fullTagEmptyElement: true
-    });
-};
+const xbeauty = require('xml-beautifier');
 
 const applyChanges = (source, original, modified) => {
-  return xformat(source.replace(original, modified)).replace(/\&/g, '&amp;');
+  return xbeauty(source.replace(original, modified), '  ').replace(/\&/g, '&amp;');
 };
 
 const setAttr = (fileInfo, query, value) => {
@@ -69,7 +51,7 @@ module.exports = {
     }
   },
   remove: {
-    attr: (fileInfo, query, value) => {
+    attr: (fileInfo, query) => {
       const queryInfo = getAttrFromQuery(query);
       const element = xpath.select1(queryInfo.root, fileInfo.parsed);
       const before = element.outerHTML+'';
@@ -78,11 +60,11 @@ module.exports = {
       fileInfo.modContent = applyChanges(fileInfo.content, before, after);
       return fileInfo;
     },
-    inner: (fileInfo, query, value) => {
+    inner: (fileInfo, query) => {
       const root = getInnerFromQuery(query);
       const element = xpath.select1(root, fileInfo.parsed);
       const before = element.innerHTML+'';
-      const after = xformat(removeWhitespace(element.innerHTML), 0).replace(xformat(removeWhitespace(value), 0), '');
+      const after = '';
       fileInfo.modContent = applyChanges(fileInfo.content, before, after);
       return fileInfo;
     }
