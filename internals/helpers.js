@@ -1,40 +1,45 @@
 const fs = require('fs');
 const pathing = require('path');
-const glob = require('glob');
-const mkdirp = require('mkdirp');
-
-const createPath = (path) => {
-  const directory = pathing.dirname(path);
-  // If the directory does not exist, create it
-  mkdirp.sync(directory);
-  return path;
-};
+const jsDom = require('jsdom').JSDOM;
+const targetTypes = require('./target-types');
 
 module.exports = {
-  isEqual: (value1, value2) => {
-    return JSON.stringify(value1) === JSON.stringify(value2);
+  readFile: (path) => {
+    return fs.readFileSync(pathing.resolve(path), { encoding: 'utf8' });
   },
-  formatTimeStamp:() => {
-    const timeStamp = new Date();
-    return `${timeStamp.getFullYear()}-${timeStamp.getMonth()+1}-${timeStamp.getDate()}-${timeStamp.getHours()}-${timeStamp.getMinutes()}`;
+  parse: (content) => {
+    return new (new jsDom()).window.DOMParser().parseFromString(content, 'text/xml');
   },
-  readFile: (path, parse) => {
-    path = pathing.resolve(path);
-    const result = fs.readFileSync(path, { encoding: 'utf8' });
-    return !parse ? result : JSON.parse(result);
+  getChangeTarget: (query) => {
+    switch(true) {
+      case /\>$/.test(query):
+        return targetTypes.INNER;
+      case /\|\[\@[A-z]{1,}\]$/.test(query):
+        return targetTypes.ATTR;
+      default:
+        throw 'No actual target specified!';
+    }
   },
-  writeFile: (path, data, parse) => {
-    data = !parse ? data : JSON.stringify(data, null, 2);
-    fs.writeFileSync(createPath(path), data);
-  },
-  getFileName: (path) => {
-    return pathing.basename(path, pathing.extname(path));
-  },
-  getFilePaths: (sourceFolder, search) => {
-    return glob.sync(search, {
-      cwd: sourceFolder,
-      nosort: true,
-      absolute: true
-    });
+  getRootQueryFromRaw: (rawQuery, targetType) => {
+    const query = rawQuery
+      .replace('$', '')
+      .replace(/(?=.)\>(?=.)/g, '/');
+
+    let splitOn;
+    switch(targetType) {
+      case targetTypes.ATTR:
+        splitOn = '|';
+        break;
+      case targetTypes.INNER:
+        splitOn = '>';
+        break;
+    }
+
+    const result = query.split(splitOn);
+    return {
+      root: result[0],
+      attrName: result[1],
+      raw: query
+    }
   }
 }
