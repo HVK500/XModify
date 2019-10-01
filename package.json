@@ -1,6 +1,6 @@
 {
   "name": "xmodify",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "Modify elements of a given xml file, using a simple to understand syntax",
   "author": "Matthew Laird <hvk500@gmail.com>",

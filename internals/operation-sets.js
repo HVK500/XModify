@@ -2,7 +2,7 @@ const xpath = require('xpath');
 const xbeauty = require('xml-beautifier');
 
 const applyChanges = (source, original, modified) => {
-  return xbeauty(source.replace(original, modified), '  ').replace(/\&/g, '&amp;');
+  return xbeauty(source.replace(original, modified), '  ');
 };
 
 const setAttr = (fileInfo, query, value) => {
