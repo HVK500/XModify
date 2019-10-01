@@ -8,8 +8,8 @@
   "repository": "https://github.com/HVK500/XModify.git",
   "main": "index.js",
   "dependencies": {
-    "jsdom": "^15.1.1",
     "xml-js": "^1.6.11",
+    "xmldom": "^0.1.27",
     "xpath": "^0.0.27"
   }
 }

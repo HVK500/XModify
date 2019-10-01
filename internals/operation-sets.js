@@ -27,6 +27,16 @@ const getInnerFromQuery = (rawQuery) => {
   return rawQuery.replace(/\>$/, '');
 };
 
+const getFirstTag = (content) => {
+  return /(?<=\<)\w+(?=\s*\w*.*\>)/.exec(content)[0];
+}
+
+const firstTagExistInSource = (content, source) => {
+  const tagWithAttr = /(?<=\<)(\w*(\s\w+\=\".*\")*)(?=[\s\/\>])/.exec(content)[0];
+  const commentedTag = new RegExp(`<!--\s*<${tagWithAttr}`);
+  return source.includes(tagWithAttr) && !commentedTag.test(source);
+};
+
 module.exports = {
   // Add to the existing selected elements structure
   add: {
@@ -53,11 +63,13 @@ module.exports = {
       const element = xpath.select1(root, fileInfo.parsed);
 
       // TODO: log why?
-      if (!element || xpath.select1(`/${valueElement.localName}`, element) != null) return fileInfo;
+      if (!element || firstTagExistInSource(value, element.innerHTML)) return fileInfo;
 
-      const before = element.innerHTML+'';
-      // element.append(valueElement);
-      const after = element.innerHTML + valueElement.outerHTML;
+      const before = element.outerHTML+'';
+      element.append(valueElement);
+      const after = element.outerHTML
+        .replace(/\sxmlns=\"http\:\/\/www\.w3\.org\/1999\/xhtml\"/g, '')
+        .replace(new RegExp(`(?<=[\\/\\<])${valueElement.localName}`, 'g'), getFirstTag(value));
 
       fileInfo.modContent = applyChanges(fileInfo.content, before, after);
 

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const pathing = require('path');
-const jsDom = require('jsdom').JSDOM;
+const xDom = require('xmldom').DOMParser;
 const targetTypes = require('./target-types');
 
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
     return fs.readFileSync(pathing.resolve(path), { encoding: 'utf8' });
   },
   parse: (content) => {
-    return new (new jsDom()).window.DOMParser().parseFromString(content, 'text/xml');
+    return new xDom().parseFromString(content);
   },
   getChangeTarget: (query) => {
     switch(true) {
@@ -43,7 +43,7 @@ module.exports = {
     }
   },
   createElement: (value) => {
-    const div = new jsDom().window.document.createElement('div');
+    const div = new xDom().createElement('div');
     div.innerHTML = value.trim();
     return div.firstChild;
   }
