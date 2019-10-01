@@ -43,6 +43,6 @@ module.exports = (operation, sourceFilePaths)=> {
 
     resolve(targetFiles.map((file) => {
       return operationFunc(file, query.raw, operation.value);
-    }));
+    }).filter(i => i.modContent !== null));
   });
 }

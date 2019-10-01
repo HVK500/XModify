@@ -1,18 +1,18 @@
 const xpath = require('xpath');
-const xbeauty = require('xml-beautifier');
+const xjs = require('xml-js');
+const { createElement } = require('./helpers');
 
-const applyChanges = (source, original, modified) => {
-  return xbeauty(source.replace(original, modified), '  ');
+const xformat = (content, spaces) => {
+  return xjs.json2xml(
+    xjs.xml2json(content),
+    {
+      spaces: spaces != null ? spaces : 2
+    }
+  );
 };
 
-const setAttr = (fileInfo, query, value) => {
-  const queryInfo = getAttrFromQuery(query);
-  const element = xpath.select1(queryInfo.root, fileInfo.parsed);
-  const before = element.outerHTML+'';
-  element.setAttribute(queryInfo.attrName, value);
-  const after = element.outerHTML;
-  fileInfo.modContent = applyChanges(fileInfo.content, before, after);
-  return fileInfo;
+const applyChanges = (source, original, modified) => {
+  return xformat(source.replace(original, modified)).replace(/\&/g, '&amp;');
 };
 
 const getAttrFromQuery = (rawQuery) => {
@@ -28,25 +28,72 @@ const getInnerFromQuery = (rawQuery) => {
 };
 
 module.exports = {
+  // Add to the existing selected elements structure
   add: {
-    attr: setAttr,
-    inner: (fileInfo, query, value) => {
-      const root = getInnerFromQuery(query);
-      const element = xpath.select1(root, fileInfo.parsed);
-      const before = element.innerHTML+'';
-      const after = element.innerHTML + value;
+    // Adds a attribute value by the given name
+    attr: (fileInfo, query, value) => {
+      const queryInfo = getAttrFromQuery(query);
+      const element = xpath.select1(queryInfo.root, fileInfo.parsed);
+
+      // TODO: log why?
+      if (!element || element.getAttribute(queryInfo.attrName) === value) return fileInfo;
+
+      const before = element.outerHTML+'';
+      element.setAttribute(queryInfo.attrName, value);
+      const after = element.outerHTML;
+
       fileInfo.modContent = applyChanges(fileInfo.content, before, after);
+
+      return fileInfo;
+    },
+    inner: (fileInfo, query, value) => {
+      // TODO: check value structure
+      const root = getInnerFromQuery(query);
+      const valueElement = createElement(value);
+      const element = xpath.select1(root, fileInfo.parsed);
+
+      // TODO: log why?
+      if (!element || xpath.select1(`/${valueElement.localName}`, element) != null) return fileInfo;
+
+      const before = element.innerHTML+'';
+      // element.append(valueElement);
+      const after = element.innerHTML + valueElement.outerHTML;
+
+      fileInfo.modContent = applyChanges(fileInfo.content, before, after);
+
       return fileInfo;
     }
   },
   edit: {
-    attr: setAttr,
+    // Changes a attribute value by the given name
+    attr: (fileInfo, query, value) => {
+      const queryInfo = getAttrFromQuery(query);
+      const element = xpath.select1(queryInfo.root, fileInfo.parsed);
+
+      // TODO: log why?
+      if (!element) return fileInfo;
+
+      const before = element.outerHTML+'';
+      element.setAttribute(queryInfo.attrName, value);
+      const after = element.outerHTML;
+
+      fileInfo.modContent = applyChanges(fileInfo.content, before, after);
+
+      return fileInfo;
+    },
+    // Slots in a given value in to selected element structure
     inner: (fileInfo, query, value) => {
       const root = getInnerFromQuery(query);
       const element = xpath.select1(root, fileInfo.parsed);
+
+      // TODO: log why?
+      if (!element) return fileInfo;
+
       const before = element.innerHTML;
       const after = value;
+
       fileInfo.modContent = applyChanges(fileInfo.content, before, after);
+
       return fileInfo;
     }
   },
@@ -54,18 +101,30 @@ module.exports = {
     attr: (fileInfo, query) => {
       const queryInfo = getAttrFromQuery(query);
       const element = xpath.select1(queryInfo.root, fileInfo.parsed);
+
+      // TODO: log why?
+      if (!element) return fileInfo;
+
       const before = element.outerHTML+'';
       element.removeAttribute(queryInfo.attrName);
       const after = element.outerHTML;
+
       fileInfo.modContent = applyChanges(fileInfo.content, before, after);
+
       return fileInfo;
     },
     inner: (fileInfo, query) => {
       const root = getInnerFromQuery(query);
       const element = xpath.select1(root, fileInfo.parsed);
+
+      // TODO: log why?
+      if (!element) return fileInfo;
+
       const before = element.innerHTML+'';
       const after = '';
+
       fileInfo.modContent = applyChanges(fileInfo.content, before, after);
+
       return fileInfo;
     }
   }

@@ -41,5 +41,10 @@ module.exports = {
       attrName: result[1],
       raw: query
     }
+  },
+  createElement: (value) => {
+    const div = new jsDom().window.document.createElement('div');
+    div.innerHTML = value.trim();
+    return div.firstChild;
   }
 }
