@@ -1,48 +1,52 @@
 const xpath = require('xpath');
-const { readFile, parse, getChangeTarget, getRootQueryFromRaw } = require('./internals/helpers');
-const operationType = require('./internals/operation-types');
-const operationSet = require('./internals/operation-sets');
+const {
+  readFile,
+  parse,
+  getChangeTargetType,
+  selectToRootAndRaw
+} = require('./internals/helpers');
 
-module.exports = (operation, sourceFilePaths)=> {
-  return new Promise((resolve, reject) => {
-    const targetType = getChangeTarget(operation.path);
+const getOperationFunction = require('./internals/operation-sets');
 
-    // Convert jspath into a simple xpath string
-    const query = getRootQueryFromRaw(operation.path, targetType);
+module.exports = (operation, sourceFilePaths) => {
+  return new Promise((resolve) => {
+    let select;
+    let operationFunc;
 
-    let targetFiles = [...sourceFilePaths]
-      .map((path) => {
-        const fileContent = readFile(path);
-        const parsedFileContent = parse(fileContent);
-
-        return {
-          path: path,
-          content: fileContent,
-          modContent: null,
-          parsed: parsedFileContent,
-          match: !!xpath.select1(query.root, parsedFileContent)
-        };
-      });
-
-    switch(operation.type) {
-      case operationType.ADD:
-        targetFiles = targetFiles.filter(i => i.match);
-        operationFunc = operationSet.add[targetType];
-        break;
-      case operationType.REMOVE:
-        targetFiles = targetFiles.filter(i => i.match);
-        operationFunc = operationSet.remove[targetType];
-        break;
-      case operationType.EDIT:
-        targetFiles = targetFiles.filter(i => i.match);
-        operationFunc = operationSet.edit[targetType];
-        break;
-      default:
-        break;
+    try {
+      const targetType = getChangeTargetType(operation.select);
+      select = selectToRootAndRaw(
+        operation.select,
+        targetType
+      );
+      operationFunc = getOperationFunction(
+        operation.type,
+        targetType
+      );
+    } catch (error) {
+      console.log(error, operation);
+      return resolve([]);
     }
 
-    resolve(targetFiles.map((file) => {
-      return operationFunc(file, query.raw, operation.value);
+    const targetFiles = sourceFilePaths.map((path) => {
+      const fileContent = readFile(path);
+      const parsedFileContent = parse(fileContent);
+
+      return {
+        path: path,
+        content: fileContent,
+        modContent: null,
+        parsed: parsedFileContent,
+        match: !!xpath.select1(select.root, parsedFileContent)
+      };
+    }).filter(fileInfo => fileInfo.match);
+
+    if (targetFiles.length === 0) {
+      return resolve([]);
+    }
+
+    resolve(targetFiles.map((fileInfo) => {
+      return operationFunc(fileInfo, select.raw, operation.value);
     }).filter(i => i.modContent !== null));
   });
 }
