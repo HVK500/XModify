@@ -1,11 +1,10 @@
-const xpath = require('xpath');
 const {
   readFile,
   parse,
   getChangeTargetType,
   selectToRootAndRaw
 } = require('./internals/helpers');
-
+const xpath = require('xpath');
 const getOperationFunction = require('./internals/operation-sets');
 
 module.exports = (operation, sourceFilePaths) => {
