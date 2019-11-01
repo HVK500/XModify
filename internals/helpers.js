@@ -4,6 +4,7 @@ const {
 const fs = require('fs');
 const jsDom = require('jsdom').JSDOM;
 const pathing = require('path');
+const xpath = require('xpath');
 const xjs = require('xml-js');
 
 module.exports = {
@@ -14,6 +15,15 @@ module.exports = {
   },
   parse: (content) => {
     return (new(new jsDom()).window.DOMParser()).parseFromString(content, 'text/xml');
+  },
+  isMatch: (selectRoot, fileContent, filePath, pathMatch) => {
+    const hasValue = !!xpath.select1(selectRoot, fileContent);
+
+    if (!!pathMatch) {
+      return new RegExp(pathMatch).test(filePath) && hasValue;
+    }
+
+    return hasValue;
   },
   getChangeTargetType: (select) => {
     switch (true) {
@@ -77,4 +87,4 @@ module.exports = {
     const commentedTag = new RegExp(`<!--\s*<${tagWithAttr}`);
     return source.includes(tagWithAttr) && !commentedTag.test(source);
   }
-}
+};

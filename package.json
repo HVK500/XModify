@@ -1,6 +1,7 @@
 {
-  "name": "@hvk500/xmodify",
-  "version": "1.0.0",
+  "name": "xmodify",
+  "version": "1.4.0",
+  "private": true,
   "description": "Modify elements of a given xml file, using a simple selection syntax.",
   "author": "Matthew Laird <hvk500@gmail.com>",
   "license": "MIT",

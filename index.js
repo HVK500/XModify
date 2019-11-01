@@ -2,9 +2,9 @@ const {
   readFile,
   parse,
   getChangeTargetType,
-  selectToRootAndRaw
+  selectToRootAndRaw,
+  isMatch
 } = require('./internals/helpers');
-const xpath = require('xpath');
 const getOperationFunction = require('./internals/operation-sets');
 
 module.exports = (operation, sourceFilePaths) => {
@@ -36,7 +36,12 @@ module.exports = (operation, sourceFilePaths) => {
         content: fileContent,
         modContent: null,
         parsed: parsedFileContent,
-        match: !!xpath.select1(select.root, parsedFileContent)
+        match: isMatch(
+          select.root,
+          parsedFileContent,
+          path,
+          operation.pathMatch
+        )
       };
     }).filter(fileInfo => fileInfo.match);
 
